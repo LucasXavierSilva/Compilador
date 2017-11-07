@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char wordLst(*word, *nextWord);
+//char wordLst(*word, *nextWord);
 typedef struct lineLst
 {
 	char line[200];
@@ -16,28 +16,23 @@ typedef struct wordLst
 	
 int main() {
 
-    FILE *f;
-    char *word;
-    int count = 0;
-    f=fopen("test.txt","rt");
-    l = (*LINES)malloc(sizeof(LINES));    
+//open and get the file handle
+FILE* fh;
+fopen_s(&fh, "test.txt", "r");
 
-	if(f == NULL)
-	{
-		printf("Problems Finding File!");
-	}
-	else
-	{
-    	while((word=fgetc(f))!=EOF){
-        	printf("%c",word);
-        	count++;
-    	}
-	}
-	
-	printf("\n %i",count);
-
-    fclose(f);
+if (fh == NULL){
+    printf("file does not exists %s", "test.txt");
     return 0;
+}
+
+
+//read line by line
+const size_t line_size = 300;
+char* line = malloc(line_size);
+while (fgets(line, line_size, fh) != NULL)  {
+    printf(line);
+}
+free(line);    // dont forget to free heap memory
 }
 
 
