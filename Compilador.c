@@ -19,10 +19,10 @@ typedef struct wordLst
 */
 char *names[2] = {"var1", "var2"};
 char *types[2] = {"int", "char"};
-char *values[2] = {"100", "stephen"};
+char *values[2] = {"one", "stephen"};
 typedef struct {
   char *name;
-  char *type; /* i for int, s for string ... */
+  char *type;
   char *value;
 } symbolTable;
 
@@ -31,9 +31,9 @@ void InsertSymbol(symbolTable *st, char *name, char *type, char *value);
 
 int main() {
 
-	symbolTable st[0];
+	int i;
+	symbolTable st[2];
 	int lineN = 0;
-	//open and get the file handle
 	FILE* fh;
 	fopen_s(&fh, "test.txt", "r");
 
@@ -46,30 +46,34 @@ int main() {
 	//read line by line
 	const size_t line_size = 300;
 	char* line = malloc(line_size);
-	while (fgets(line, line_size, fh) != NULL)  {
+	while (fgets(line, line_size, fh) != NULL)
+	{
 		lineN++;
 		line = RemoveSpaces(line);
     	printf(line);
 	}
 
-    InsertSymbol(&st[0],names[0],types[0],values[0]);
-	free(line);    // dont forget to free heap memory
+    for (i = 0; i < 2; i++)
+    {
+    	InsertSymbol(&st[i], names[i], types[i], values[i]);
+    	printf("\nNome: %s, Tipo: %s, Valor: %s", st[i].name, st[i].type, st[i].value);
+	}
+	
+	free(line);
 }
 
 char* RemoveSpaces (char* input)
 {
-    int loop;
-    char *output = (char*) malloc (strlen(input));
-    char *dest = output;
-
-    if (output)
+    int i,j;
+    char *output=input;
+    for (i = 0, j = 0; i<strlen(input); i++,j++)          
     {
-        for (loop=0; loop<strlen(input); loop++)
-            if (input[loop] != ' ')
-                *dest++ = input[loop];
-
-        *dest = '\0';
+        if (input[i]!=' ')                           
+            output[j]=input[i];                     
+        else
+            j--;                                     
     }
+    output[j]=0;
     return output;
 }
 
@@ -78,7 +82,4 @@ void InsertSymbol(symbolTable *st, char *name, char *type, char *value)
     st->name = name;
     st->type = type;
     st->value = value;
-    printf("\n",name);
-    printf("\n",type);
-    printf("\n",value);
 }
