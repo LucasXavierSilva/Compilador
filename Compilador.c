@@ -4,22 +4,11 @@
 #include<stdlib.h>
 #include<locale.h>
 
-//char wordLst(*word, *nextWord);
-/*typedef struct lineLst
-{
-	char line[200];
-	int *nextLine, lineNum;
-};
 
-typedef struct wordLst
-{
-	char word[50];
-	int *nxtWord;
-} LINES;
-*/
 char *names[2] = {"var1", "var2"};
 char *types[2] = {"int", "char"};
 char *values[2] = {"1", "stephen"};
+char *lines[200];
 typedef struct {
   char *name;
   char *type;
@@ -27,10 +16,13 @@ typedef struct {
 } symbolTable;
 
 char* RemoveSpaces (char* input);
+
 void InsertSymbol(symbolTable *st, char *name, char *type, char *value);
+void AddLine();
+void CheckVariables();
 
 int main() {
-
+	setlocale(LC_ALL, "PORTUGUESE");
 	int i;
 	symbolTable st[2];
 	int lineN = 0;
@@ -48,15 +40,26 @@ int main() {
 	char* line = malloc(line_size);
 	while (fgets(line, line_size, fh) != NULL)
 	{
-		lineN++;
 		line = RemoveSpaces(line);
-    	printf(line);
+		if(lineN == 0 && !(strstr(line,"programa")))
+		{
+			printf("O código deve inciar com \"programa\" na linha %i\n",lineN+1);
+			break;
+		}
+		else
+		{
+			lines[lineN] = line;
+    		printf(lines[lineN]);
+		}
+    	
+		lineN++;
 	}
 
     for (i = 0; i < 2; i++)
     {
     	InsertSymbol(&st[i], names[i], types[i], values[i]);
     	printf("\nNome: %s, Tipo: %s, Valor: %s", st[i].name, st[i].type, st[i].value);
+    	printf("%p",st[i]);
 	}
 	
 	free(line);

@@ -1,4 +1,4 @@
-programa
+teste
 	inteiro #c;
 	inteiro #b, #a;
 fim
