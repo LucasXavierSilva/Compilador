@@ -1,6 +1,4 @@
-Primeira Linha Lucas Antonio Xavier Silva
-Segunda Linha Lucas Antonio Xavier Silva
-Terceira Linha Lucas Antonio Xavier Silva
-Quarta Linha Lucas Antonio Xavier Silva
-Quinta Linha Lucas Antonio Xavier Silva
-Sexta Linha Lucas Antonio Xavier Silva
+programa
+	inteiro #c;
+	inteiro #b, #a;
+fim

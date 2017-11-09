@@ -19,7 +19,7 @@ typedef struct wordLst
 */
 char *names[2] = {"var1", "var2"};
 char *types[2] = {"int", "char"};
-char *values[2] = {"one", "stephen"};
+char *values[2] = {"1", "stephen"};
 typedef struct {
   char *name;
   char *type;
