@@ -19,13 +19,14 @@ symbolTable *root = NULL;
 
 char *removeSpaces (char *input);
 
-symbolTable insertSymbol(char *name, char *type, char *value);
+symbolTable *insertSymbol(char *name, char *type, char *value);
 void createList(char *name, char *type, char *value);
 void addLine();
 void checkVariables();
 
 int main() {
 	setlocale(LC_ALL, "PORTUGUESE");
+	createList("NULL", "NULL", "NULL");
 	int i;
 	symbolTable st[2];
 	int lineN = 0;
@@ -84,7 +85,7 @@ char* removeSpaces (char* input)
     return output;
 }
 
-symbolTable insertSymbol(char *name, char *type, char *value)
+symbolTable *insertSymbol(char *name, char *type, char *value)
 {
 	symbolTable *st;
 	st = (symbolTable*)malloc(sizeof(symbolTable));
@@ -97,11 +98,12 @@ symbolTable insertSymbol(char *name, char *type, char *value)
     
     st->value = (char *)malloc(strlen(value));
     strncpy(st->value, value, strlen(value)+1);
+    st->next = NULL;
     
-    return *st;
+    return st;
 }
 
-void CreateList(char *name, char *type, char *value)
+void createList(char *name, char *type, char *value)
 {
-	*root = insertSymbol(name, type, value);
+	root = insertSymbol(name, type, value);
 }
