@@ -3,6 +3,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<locale.h>
+#include <stdbool.h>
 
 
 char *names[2] = {"var1", "var2"};
@@ -21,15 +22,16 @@ char *removeSpaces (char *input);
 
 symbolTable *insertSymbol(char *name, char *type, char *value);
 void createList(char *name, char *type, char *value);
-void addLine();
-void checkVariables();
+void checkVariable(char *line);
+bool checkVariableList(char *name);
+bool dataSearch(symbolTable, char *name);
 
 int main() {
 	setlocale(LC_ALL, "PORTUGUESE");
 	createList("NULL", "NULL", "NULL");
 	int i;
 	symbolTable st[2];
-	int lineN = 0;
+	int lineNo = 0;
 	FILE* fh;
 	fopen_s(&fh, "test.txt", "r");
 
@@ -45,18 +47,19 @@ int main() {
 	while (fgets(line, line_size, fh) != NULL)
 	{
 		line = removeSpaces(line);
-		if(lineN == 0 && !(strstr(line,"programa")))
+		if(lineNo == 0 && !(strstr(line,"programa")))
 		{
-			printf("O código deve inciar com \"programa\" na linha %i\n",lineN+1);
+			printf("O código deve inciar com \"programa\" na linha %i\n",lineNo+1);
 			break;
 		}
 		else
 		{
-			lines[lineN] = line;
-    		printf(lines[lineN]);
+			lines[lineNo] = line;
+    		printf(lines[lineNo]);
+    		checkVariable(lines[lineNo]);
 		}
     	
-		lineN++;
+		lineNo++;
 	}
 /*
     for (i = 0; i < 2; i++)
@@ -106,4 +109,39 @@ symbolTable *insertSymbol(char *name, char *type, char *value)
 void createList(char *name, char *type, char *value)
 {
 	root = insertSymbol(name, type, value);
+}
+
+
+void checkLine(char *line, int lineNo)
+{
+	
+}
+
+void checkVariable(char *line)
+{
+	
+	int aux = 0, x;
+    while(!isspace(line[aux]))
+    {
+    	//printf("\nloop");
+        aux++;
+    }
+    char *variable = (char*) malloc(sizeof(char)*aux);
+    for(x=0;x!=aux;x++)
+    {
+    	//printf("\nloop2");
+        variable[x] = line[x];
+    }
+    printf(variable);
+    return variable;
+}
+
+bool checkVariableList(char *name)
+{
+	bool b;
+}
+
+bool dataSearch(symbolTable st, char *name)
+{
+	bool b;
 }

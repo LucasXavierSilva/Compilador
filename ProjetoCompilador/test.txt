@@ -1,0 +1,4 @@
+programa
+    inteiro #c;
+    inteiro #b, #a;
+fim
