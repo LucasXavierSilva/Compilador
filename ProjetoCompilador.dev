@@ -50,9 +50,6 @@ ProductVersion=
 AutoIncBuildNr=0
 SyncProduct=1
 
-[Unit2]
-FileName=ProjetoCompilador\compilador.c
-
 [Unit1]
 FileName=ProjetoCompilador\compilador.c
 CompileCpp=0

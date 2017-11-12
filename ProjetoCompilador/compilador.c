@@ -19,10 +19,10 @@ typedef struct list {
 symbolTable *root = NULL; 
 
 char *removeSpaces (char *input);
-
+char *splitLine (char *input);
 symbolTable *insertSymbol(char *name, char *type, char *value);
 void createList(char *name, char *type, char *value);
-void checkVariable(char *line);
+char checkVariable(char *line);
 bool checkVariableList(char *name);
 bool dataSearch(symbolTable, char *name);
 
@@ -55,8 +55,9 @@ int main() {
 		else
 		{
 			lines[lineNo] = line;
-    		printf(lines[lineNo]);
+    		//printf(lines[lineNo]);
     		checkVariable(lines[lineNo]);
+    		splitLine(line);
 		}
     	
 		lineNo++;
@@ -88,6 +89,45 @@ char* removeSpaces (char* input)
     return output;
 }
 
+char *splitLine (char *input)
+{
+	char *token, *string, *name, *type, *value, splitVariable[100], SplitValue[100];
+	
+	strcpy(splitVariable, input);
+	strcpy(SplitValue, input);
+	
+	if(strstr(input,"inteiro"))
+	{
+		type = "inteiro";
+	}
+	else if(strstr(input,"caractere"))
+	{
+		type = "caractere";
+	}
+	else if(strstr(input,"real"))
+	{
+		type = "real";
+	}
+	else
+	{
+		printf("\nNão é uma declaração de variável!\n");
+		return 0;
+	}
+    
+    if(strstr(input,"="))
+    {
+    	name = strtok(splitVariable, "=");
+    	value = strpbrk(SplitValue, "=");
+	}
+	else
+	{
+    	name = strtok(splitVariable, "=");
+		value = "NULL";
+	}
+	insertSymbol(name, type, value);
+	return token;
+}
+
 symbolTable *insertSymbol(char *name, char *type, char *value)
 {
 	symbolTable *st;
@@ -103,6 +143,7 @@ symbolTable *insertSymbol(char *name, char *type, char *value)
     strncpy(st->value, value, strlen(value)+1);
     st->next = NULL;
     
+    printf("\n Nome: %s, Tipo: %s, Valor: %s Insert into table Successful!\n",name, type, value);
     return st;
 }
 
@@ -117,7 +158,7 @@ void checkLine(char *line, int lineNo)
 	
 }
 
-void checkVariable(char *line)
+char checkVariable(char *line)
 {
 	
 	int aux = 0, x;
@@ -132,7 +173,7 @@ void checkVariable(char *line)
     	//printf("\nloop2");
         variable[x] = line[x];
     }
-    printf(variable);
+    //printf(variable);
     return variable;
 }
 
@@ -142,6 +183,7 @@ bool checkVariableList(char *name)
 }
 
 bool dataSearch(symbolTable st, char *name)
-{
-	bool b;
+{    bool found = false;
+
+	return found;
 }
