@@ -116,8 +116,8 @@ char *splitLine (char *input)
     
     if(strstr(input,"="))
     {
-    	name = strtok(splitVariable, "=");
-    	value = strpbrk(SplitValue, "=");
+    	printf("\n\n\n\n\n %s \n\n\n\n\n\n",splitVariable);
+     	value = strpbrk(SplitValue, "=");
 	}
 	else
 	{
