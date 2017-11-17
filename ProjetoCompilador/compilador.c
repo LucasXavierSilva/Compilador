@@ -24,7 +24,9 @@ symbolTable *insertSymbol(char *name, char *type, char *value);
 void createList(char *name, char *type, char *value);
 char checkVariable(char *line);
 bool checkVariableList(char *name);
+int checkChar(char *line, char *value);
 bool dataSearch(symbolTable, char *name);
+
 
 int main() {
 	setlocale(LC_ALL, "PORTUGUESE");
@@ -80,7 +82,7 @@ char* removeSpaces (char* input)
     char *output=input;
     for (i = 0, j = 0; i<strlen(input); i++,j++)          
     {
-        if (input[i]!=' ')                           
+        if (input[i]!=' ' || input[i]!='	')                           
             output[j]=input[i];                     
         else
             j--;                                     
@@ -91,7 +93,7 @@ char* removeSpaces (char* input)
 
 char *splitLine (char *input)
 {
-	char *token, *string, *name, *type, *value, splitVariable[100], SplitValue[100];
+	char *token, *string, *name="NULL", *type="NULL", *value="NULL", splitVariable[100], SplitValue[100];
 	
 	strcpy(splitVariable, input);
 	strcpy(SplitValue, input);
@@ -113,11 +115,13 @@ char *splitLine (char *input)
 		printf("\nNão é uma declaração de variável!\n");
 		return 0;
 	}
+	
+	checkChar(input, "#");
     
     if(strstr(input,"="))
     {
-    	printf("\n\n\n\n\n %s \n\n\n\n\n\n",splitVariable);
-     	value = strpbrk(SplitValue, "=");
+    	//printf("\n\n\n\n\n %s \n\n\n\n\n\n",splitVariable);
+	     	value = strpbrk(SplitValue, "=");
 	}
 	else
 	{
@@ -164,16 +168,13 @@ char checkVariable(char *line)
 	int aux = 0, x;
     while(!isspace(line[aux]))
     {
-    	//printf("\nloop");
         aux++;
     }
     char *variable = (char*) malloc(sizeof(char)*aux);
     for(x=0;x!=aux;x++)
     {
-    	//printf("\nloop2");
         variable[x] = line[x];
     }
-    //printf(variable);
     return variable;
 }
 
@@ -182,6 +183,42 @@ bool checkVariableList(char *name)
 	bool b;
 }
 
+int checkChar(char *line, char *value)
+{
+	char splitLine[strlen(line)], aux;
+	int i = 0;
+
+	strcpy(splitLine, line);
+	strcpy(aux, value);
+
+	for(i; i <= strlen(line); i++)
+	{
+		//printf(value);
+		printf("\n %c", splitLine[i]);
+		if(splitLine[i] == aux)
+		{
+			printf("\n %c encontrado!", aux);
+		}
+	}
+	return 0;
+}/*
+int checkChar(char *string, char *value)
+{
+	const char *invalidChars = value;
+					   char *mystring = string;
+					   char *character = mystring;
+					   int i = 0;
+					   while (*character)
+					   {
+					       if (strchr(invalidChars, *character))
+					       {
+					         i++;
+					       }					
+					       character++;
+					   }
+					   printf("\n\n %i \n\n",i);
+		return i;
+}*/
 bool dataSearch(symbolTable st, char *name)
 {    bool found = false;
 
