@@ -19,13 +19,14 @@ typedef struct list {
 symbolTable *root = NULL; 
 
 char *removeSpaces (char *input);
+char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter);
 char *splitLine (char *input);
 symbolTable *insertSymbol(char *name, char *type, char *value);
 void createList(char *name, char *type, char *value);
 char checkVariable(char *line);
 bool checkVariableList(char *name);
-int checkChar(char *line, char *value);
 bool dataSearch(symbolTable, char *name);
+int checkChar(char *string, char *value);
 
 
 int main() {
@@ -82,7 +83,7 @@ char* removeSpaces (char* input)
     char *output=input;
     for (i = 0, j = 0; i<strlen(input); i++,j++)          
     {
-        if (input[i]!=' ' || input[i]!='	')                           
+        if (input[i]!=' ' && input[i] != '\t' && input [i] != '\n')                           
             output[j]=input[i];                     
         else
             j--;                                     
@@ -91,12 +92,50 @@ char* removeSpaces (char* input)
     return output;
 }
 
+char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter)
+{
+    const char *s = line;
+
+	const char *PATTERN1 = firstDelimiter;
+    const char *PATTERN2 = secondDelimiter;
+
+    char *target = NULL;
+    char *start, *end;
+
+	/*
+	if(strstr(s,"\""))
+	{
+		PATTERN1 = "\"";
+		PATTERN2 = "\"";
+	}*/
+	
+    if ( start = strstr( s, PATTERN1 ) )
+    {
+        start += strlen( PATTERN1 );
+        if ( end = strstr( start, PATTERN2 ) )
+        {
+            target = ( char * )malloc( end - start + 1 );
+            memcpy( target, start, end - start );
+            target[end - start] = '\0';
+			return target;
+            
+        }
+        else
+        {
+        	printf("Delimitador %s não encontrado", PATTERN2);
+        	return 0;
+		}
+    }
+
+    //if ( target ) printf( "\n\n\n %s\n\n\n", target );
+}
+
 char *splitLine (char *input)
 {
-	char *token, *string, *name="NULL", *type="NULL", *value="NULL", splitVariable[100], SplitValue[100];
+	char *token, *string, *name="NULL", *type="NULL", *value="NULL", splitVariable[100], splitValue[100];
 	
 	strcpy(splitVariable, input);
-	strcpy(SplitValue, input);
+	strcpy(splitValue, input);
 	
 	if(strstr(input,"inteiro"))
 	{
@@ -115,17 +154,22 @@ char *splitLine (char *input)
 		printf("\nNão é uma declaração de variável!\n");
 		return 0;
 	}
-	
-	checkChar(input, "#");
-    
-    if(strstr(input,"="))
-    {
-    	//printf("\n\n\n\n\n %s \n\n\n\n\n\n",splitVariable);
-	     	value = strpbrk(SplitValue, "=");
+	printf("TESTE!!");
+	if(strstr(input,"#"))
+	{		
+	    name = splitChar(splitVariable,"#",",");
+	    printf("SACA ESSE NOME!: %s",name);
 	}
+
+	if(strstr(input,"="))
+	{
+		name = splitChar(splitVariable,"#", "=");
+	  	value = splitChar(splitValue,"\"","\"");       
+	}
+	
 	else
 	{
-    	name = strtok(splitVariable, "=");
+	   	name = strtok(splitVariable, "=");
 		value = "NULL";
 	}
 	insertSymbol(name, type, value);
@@ -183,25 +227,13 @@ bool checkVariableList(char *name)
 	bool b;
 }
 
-int checkChar(char *line, char *value)
-{
-	char splitLine[strlen(line)], aux;
-	int i = 0;
 
-	strcpy(splitLine, line);
-	strcpy(aux, value);
+bool dataSearch(symbolTable st, char *name)
+{    bool found = false;
 
-	for(i; i <= strlen(line); i++)
-	{
-		//printf(value);
-		printf("\n %c", splitLine[i]);
-		if(splitLine[i] == aux)
-		{
-			printf("\n %c encontrado!", aux);
-		}
-	}
-	return 0;
-}/*
+	return found;
+}
+
 int checkChar(char *string, char *value)
 {
 	const char *invalidChars = value;
@@ -218,9 +250,4 @@ int checkChar(char *string, char *value)
 					   }
 					   printf("\n\n %i \n\n",i);
 		return i;
-}*/
-bool dataSearch(symbolTable st, char *name)
-{    bool found = false;
-
-	return found;
 }

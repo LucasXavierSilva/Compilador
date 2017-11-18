@@ -1,5 +1,3 @@
 programa
-    inteiro #c, #d, #n;
-    caractere #b="s", #a;
-    real #r, #z;
+	caractere #b="string", #c;
 fim
