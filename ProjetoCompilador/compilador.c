@@ -79,14 +79,22 @@ int main() {
 
 char* removeSpaces (char* input)
 {
-    int i,j;
+    int i,j, aux = 1;
     char *output=input;
     for (i = 0, j = 0; i<strlen(input); i++,j++)          
     {
-        if (input[i]!=' ' && input[i] != '\t' && input [i] != '\n')                           
-            output[j]=input[i];                     
+    	if(input[i] == '\"' )
+        {
+        	aux = aux*(-1);
+		}
+        if ((input[i] != ' ' && input[i] != '\t' && input [i] != '\n') || (aux < 0))
+		{    
+            output[j]=input[i];
+		}                      
         else
-            j--;                                     
+        {
+            j--;
+		}                                 
     }
     output[j]=0;
     return output;
@@ -122,8 +130,8 @@ char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter)
         }
         else
         {
-        	printf("Delimitador %s não encontrado", PATTERN2);
-        	return 0;
+        	target = "ERRO Delimitador não encontrado";
+        	return target;
 		}
     }
 
@@ -132,7 +140,7 @@ char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter)
 
 char *splitLine (char *input)
 {
-	char *token, *string, *name="NULL", *type="NULL", *value="NULL", splitVariable[100], splitValue[100];
+	char *token, *string, *name="NULL", *type="NULL", *value="NULL", splitVariable[strlen(input)], splitValue[strlen(input)];
 	
 	strcpy(splitVariable, input);
 	strcpy(splitValue, input);
@@ -154,25 +162,37 @@ char *splitLine (char *input)
 		printf("\nNão é uma declaração de variável!\n");
 		return 0;
 	}
-	printf("TESTE!!");
-	if(strstr(input,"#"))
-	{		
-	    name = splitChar(splitVariable,"#",",");
-	    printf("SACA ESSE NOME!: %s",name);
-	}
-
-	if(strstr(input,"="))
+	while(checkChar(input,"#") <= 0)
 	{
-		name = splitChar(splitVariable,"#", "=");
-	  	value = splitChar(splitValue,"\"","\"");       
-	}
+		if(strstr(input,"#"))
+		{		
+		    name = splitChar(splitVariable,"#",",");
+		    name = splitChar(splitVariable,"#",";");
+		    
+		}
 	
-	else
-	{
-	   	name = strtok(splitVariable, "=");
-		value = "NULL";
+		if(strstr(input,"="))
+		{
+			name = splitChar(splitVariable,"#", "=");
+		  	value = splitChar(splitValue,"=",",");
+		  	value = splitChar(splitValue,"=",";");
+			if(type != "caractere" && strstr(input,"\""))
+			{
+				printf("\nTipo %s não pode receber valor do tipo charactere!", type);
+				return 0;
+			}
+			else if(type == "charactere" && strstr(input,"\""))
+		  		value = splitChar(splitValue,"\"","\"");
+		}	
+		else
+		{
+		   	name = strtok(splitVariable, "=");
+			value = "NULL";
+		}
+		splitChar(line,)
+	
+		insertSymbol(name, type, value);
 	}
-	insertSymbol(name, type, value);
 	return token;
 }
 
@@ -189,7 +209,6 @@ symbolTable *insertSymbol(char *name, char *type, char *value)
     
     st->value = (char *)malloc(strlen(value));
     strncpy(st->value, value, strlen(value)+1);
-    st->next = NULL;
     
     printf("\n Nome: %s, Tipo: %s, Valor: %s Insert into table Successful!\n",name, type, value);
     return st;

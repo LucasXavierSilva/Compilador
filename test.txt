@@ -1,3 +1,4 @@
 programa
-	caractere #b="string", #c;
+	inteiro #variavel2=1;
+	caractere #variavel1="Valor da String", #c;
 fim
