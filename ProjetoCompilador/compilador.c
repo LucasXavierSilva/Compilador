@@ -16,24 +16,27 @@ typedef struct list {
   char *value;
   struct list *next;
 } symbolTable;
-symbolTable *root = NULL; 
+symbolTable *root = NULL, *leaf = NULL; 
 
 char *removeSpaces (char *input);
 char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter);
 char *splitLine (char *input);
 symbolTable *insertSymbol(char *name, char *type, char *value);
 void createList(char *name, char *type, char *value);
+int *checkList(char *name);
+void printList();
 char checkVariable(char *line);
 bool checkVariableList(char *name);
 bool dataSearch(symbolTable, char *name);
 int checkChar(char *string, char *value);
+int testSemi(const char *str);
 
+int size = 0;
 
 int main() {
 	setlocale(LC_ALL, "PORTUGUESE");
 	createList("NULL", "NULL", "NULL");
 	int i;
-	symbolTable st[2];
 	int lineNo = 0;
 	FILE* fh;
 	fopen_s(&fh, "test.txt", "r");
@@ -72,7 +75,11 @@ int main() {
     	printf("\nNome: %s, Tipo: %s, Valor: %s", st[i].name, st[i].type, st[i].value);
     	printf("%p",st[i]);
 	}
-	*/
+	*/	
+	
+		
+    printList();
+	printf("\nQuantidade de bytes usado: %i",size);
 	free(line);
 	free(root);
 }
@@ -141,9 +148,9 @@ char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter)
 char *splitLine (char *input)
 {
 	char *token, *string, *name="NULL", *type="NULL", *value="NULL", splitVariable[strlen(input)], splitValue[strlen(input)];
-	
 	strcpy(splitVariable, input);
 	strcpy(splitValue, input);
+	int aux = checkChar(input,"#");
 	
 	if(strstr(input,"inteiro"))
 	{
@@ -162,61 +169,124 @@ char *splitLine (char *input)
 		printf("\nNão é uma declaração de variável!\n");
 		return 0;
 	}
-	while(checkChar(input,"#") <= 0)
+	if(testSemi(input))
 	{
+		printf("\nA linha deve finalizar com \";\"");
+		return 0;
+	}
+	while(aux != 0)
+	{
+		value = "NULL";
+		name = "NULL";
 		if(strstr(input,"#"))
-		{		
-		    name = splitChar(splitVariable,"#",",");
-		    name = splitChar(splitVariable,"#",";");
+		{	
+			if(!strstr(splitChar(input,"#",","),"ERRO"))
+		    	name = splitChar(input,"#",",");
+		    else if(!strstr(splitChar(input,"#",";"),"ERRO"))
+		    	name = splitChar(input,"#",";");
 		    
 		}
 	
 		if(strstr(input,"="))
 		{
-			name = splitChar(splitVariable,"#", "=");
-		  	value = splitChar(splitValue,"=",",");
-		  	value = splitChar(splitValue,"=",";");
+			if(!strstr(splitChar(input,"#","="),"ERRO"))
+				name = splitChar(input,"#", "=");
+				
+			if(!strstr(splitChar(input,"=",","),"ERRO"))
+		  		value = splitChar(input,"=",",");
+		  
+			if(!strstr(splitChar(input,"=",";"),"ERRO"))
+		  		value = splitChar(input,"=",";");
+		  	
 			if(type != "caractere" && strstr(input,"\""))
 			{
 				printf("\nTipo %s não pode receber valor do tipo charactere!", type);
 				return 0;
 			}
-			else if(type == "charactere" && strstr(input,"\""))
+			else if(type == "caractere" && strstr(input,"\""))
 		  		value = splitChar(splitValue,"\"","\"");
-		}	
-		else
-		{
-		   	name = strtok(splitVariable, "=");
-			value = "NULL";
 		}
-		splitChar(line,)
-	
+		if(aux > 1)
+		{
+			input = splitChar(input,",",";");
+			strcat(input, ";");
+		}
+		/*
+		if(checkList(name) == 1)
+		{
+			printf("Nome já existe na tabela de símbolos: %s", nome);
+			return 0;
+		}*/
 		insertSymbol(name, type, value);
+		aux--;
 	}
 	return token;
 }
 
 symbolTable *insertSymbol(char *name, char *type, char *value)
-{
-	symbolTable *st;
-	st = (symbolTable*)malloc(sizeof(symbolTable));
-	
-    st->name = (char *)malloc(strlen(name));
-    strncpy(st->name, name, strlen(name)+1);
+{	
+	if (root == NULL)
+	{
+		root = (symbolTable *) malloc(sizeof(symbolTable));	  
+		leaf = root;
+	}
+		
+	else 
+	{
+		leaf->next = (symbolTable *) malloc(sizeof(symbolTable));
+		leaf = leaf->next;
+	}
+	leaf->name = (char *)malloc(strlen(name));
+    strncpy(leaf->name, name, strlen(name)+1);
     
-    st->type = (char *)malloc(strlen(type));
-    strncpy(st->type, type, strlen(type)+1);
+    leaf->type = (char *)malloc(strlen(type));
+    strncpy(leaf->type, type, strlen(type)+1);
     
-    st->value = (char *)malloc(strlen(value));
-    strncpy(st->value, value, strlen(value)+1);
+    leaf->value = (char *)malloc(strlen(value));
+    strncpy(leaf->value, value, strlen(value)+1);
+    leaf->next == NULL;
     
+    size = size + sizeof(leaf->name);
+    size = size + sizeof(leaf->value);
+    size = size + sizeof(leaf->type);
+    size = size + sizeof(leaf);
     printf("\n Nome: %s, Tipo: %s, Valor: %s Insert into table Successful!\n",name, type, value);
-    return st;
+    return leaf;
 }
 
 void createList(char *name, char *type, char *value)
 {
 	root = insertSymbol(name, type, value);
+}
+
+int *checkList(char *name)
+{
+    symbolTable *aux;
+    char *nameCheck="teste";
+
+    aux = root;
+    
+    while (aux != NULL) {
+		if(name == nameCheck)
+    		return 1;
+		aux = aux->next;
+    }
+    return 0;
+}
+void printList()
+{
+    	
+    symbolTable *aux;
+    int i=1;
+       
+    aux = root;
+      
+	while (aux != NULL) 
+	{
+       printf("\n%iª Variável Nome: %s Tipo: %s Valor: %s",i, aux->name, aux->type, aux->value);
+       i++;
+       aux = aux->next; /* próxima célula */
+    }
 }
 
 
@@ -267,6 +337,13 @@ int checkChar(char *string, char *value)
 					       }					
 					       character++;
 					   }
-					   printf("\n\n %i \n\n",i);
 		return i;
+}
+
+int testSemi(const char *str)
+{
+  if(*str && str[strlen(str + 1)] == ';')
+    return 0;
+  else
+    return 1;
 }

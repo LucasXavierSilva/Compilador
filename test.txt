@@ -1,4 +1,4 @@
 programa
 	inteiro #variavel2=1;
-	caractere #variavel1="Valor da String", #c;
+	caractere #variavel1="Valor da String", #f, #d, #e;
 fim
