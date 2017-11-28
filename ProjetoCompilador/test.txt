@@ -1,4 +1,4 @@
 programa
-    inteiro #c;
+    intei #c;
     inteiro #b, #a;
 fim

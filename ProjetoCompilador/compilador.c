@@ -42,8 +42,8 @@ int main() {
 	fopen_s(&fh, "test.txt", "r");
 
 	if (fh == NULL){
-   		printf("file does not exists %s", "test.txt");
-   		return 0;
+   		printf("O seguinte arquivo não existe: %s", "test.txt");
+   		system("pause");
 	}
 
 
@@ -56,7 +56,7 @@ int main() {
 		if(lineNo == 0 && !(strstr(line,"programa")))
 		{
 			printf("O código deve inciar com \"programa\" na linha %i\n",lineNo+1);
-			break;
+			system("pause");
 		}
 		else
 		{
@@ -151,19 +151,28 @@ char *splitLine (char *input)
 	strcpy(splitVariable, input);
 	strcpy(splitValue, input);
 	int aux = checkChar(input,"#");
-	
-	if(strstr(input,"inteiro"))
+
+	if(strstr(input,"#"))
 	{
-		type = "inteiro";
-	}
-	else if(strstr(input,"caractere"))
-	{
-		type = "caractere";
-	}
-	else if(strstr(input,"real"))
-	{
-		type = "real";
-	}
+		
+		if(strstr(input,"inteiro"))
+		{
+			type = "inteiro";
+		}
+		else if(strstr(input,"caractere"))
+		{
+			type = "caractere";
+		}
+		else if(strstr(input,"real"))
+		{
+			type = "real";
+		}
+		else
+		{
+			printf("Atribuição de variável deve receber tipo de valor inteiro, caractere ou real!");
+			system("pause");
+		}
+	}	
 	else
 	{
 		printf("\nNão é uma declaração de variável!\n");
