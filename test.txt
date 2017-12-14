@@ -1,4 +1,5 @@
 programa
-	inteiro #variavel2=1;
-	caractere #variavel1="Valor da String", #f, #d, #e;
+	inteiro #a[1]=1;
+	caractere #a="Valor da String", #w, #e, #r;
+	real #t = 3.6;
 fim
