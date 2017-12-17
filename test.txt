@@ -1,4 +1,12 @@
 programa
-	inteiro #a=2, #b=#a+#b+133;
+	inteiro #a=2, #b=4;  
+	real #c=4;
+	caractere #d="teste tes ta n do es paço";
+	leia(#b,#c);
 
+	escreva("teste",#b,#a);
+	
+	para(;;;)
+	{
+	}
 fim

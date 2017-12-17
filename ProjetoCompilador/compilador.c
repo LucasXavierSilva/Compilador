@@ -4,7 +4,7 @@
 #include<stdlib.h>
 #include<locale.h>
 #include<stdbool.h>
-#include <C:\Users\Lucas\Documents\GitHub\Compilador\sintatica.h>
+#include <C:\Users\Lucas\Documents\GitHub\Compilador\lexica.h>
 
 
 char *names[2] = {"var1", "var2"};
@@ -16,26 +16,28 @@ typedef struct list {
   char *type;
   char *value;
   char *sizeLimit;
+  int line;
   struct list *next;
 } symbolTable;
 
 symbolTable *root = NULL, *leaf = NULL; 
-symbolTable *insertSymbol(char *name, char *type, char *value, char *sizeLimit);
+symbolTable *insertSymbol(char *name, char *type, char *value, char *sizeLimit, int line);
 
 bool checkVariableList(char *name);
 bool dataSearch(symbolTable, char *name);
 
+char read(char *line);
 char checkVariable(char *line);
+char *findValue(char *name);
 char *removeSpaces (char *input);
 char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter);
 char *insertVariables (char *input);
 
 int checkChar(char *string, char *value);
 int checkInsertVarName(char *name);
-int *checkList(char *name);
+int checkList(char *name);
 int checkNumber(const char *string);
 int testReserved(char *str);
-int testSemi(const char *str); 
 
 void createList(char *name, char *type, char *value, char *sizeLimit);
 void equation();
@@ -44,7 +46,7 @@ void printList();
 
 
 int size = 0;
-int lineNo = 0;
+int lineNo = 1;
 FILE* fh;
 
 int main() {
@@ -59,6 +61,7 @@ int main() {
 	}
 	
 	lineCount();
+	equation();
 /*
     for (i = 0; i < 2; i++)
     {
@@ -75,7 +78,7 @@ int main() {
 }
 
 //Inserts variables into the Symbol Table
-symbolTable *insertSymbol(char *name, char *type, char *value, char *sizeLimit)
+symbolTable *insertSymbol(char *name, char *type, char *value, char *sizeLimit, int line)
 {	
 	if (root == NULL)
 	{
@@ -98,15 +101,18 @@ symbolTable *insertSymbol(char *name, char *type, char *value, char *sizeLimit)
     strncpy(leaf->value, value, strlen(value)+1);
     
     leaf->sizeLimit = (char *)malloc(strlen(sizeLimit));
-    strncpy(leaf->sizeLimit, value, strlen(sizeLimit)+1);
-    leaf->next == NULL;
+    strncpy(leaf->sizeLimit, sizeLimit, strlen(sizeLimit)+1);
+    
+    leaf->line = line;
+    leaf->next = NULL;
     
     size = size + sizeof(leaf->name);
     size = size + sizeof(leaf->value);
     size = size + sizeof(leaf->type);
     size = size + sizeof(leaf->sizeLimit);
+    size = size + sizeof(leaf->line);
     size = size + sizeof(leaf);
-    printf("\n Nome: %s, Tipo: %s, Valor: %s Insert into table Successful!\n",name, type, value);
+    //printf("\n Nome: %s, Tipo: %s, Valor: %s Insert into table Successful!\n",name, type, value);
     return leaf;
 }
 
@@ -123,6 +129,67 @@ bool dataSearch(symbolTable st, char *name)
 	return found;
 }
 
+//Leia function
+char read(char *line)
+{	
+	char *token, *name="NULL";
+	int aux = checkChar(line,",") + 1;
+	
+	testSemi(line,lineNo);
+	
+	if(strstr(splitChar(line,"(",")"),"inteiro") || strstr(splitChar(line,"(",")"),"caractere") || strstr(splitChar(line,"(",")"),"real"))
+	{
+		printf("\nERRO linha %i: Não pode haver declaração de variável dentro da função \"leia()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+	
+	if(strstr(line,"()") || strstr(line,"(,") || strstr(line,",)") || strstr(line,",,"))
+	{
+		printf("\nERRO linha %i: Poucos argumentos dentro da função \"leia()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+	//printf("%i \n",aux);
+	
+	while(aux != 0)
+	{
+		
+		name = "NULL";
+		if(strstr(line,"#"))
+		{	
+			if(!strstr(splitChar(line,"#",","),"ERRO"))
+		    	name = splitChar(line,"#",",");
+		    else if(!strstr(splitChar(line,"#",")"),"ERRO"))
+		    	name = splitChar(line,"#",")");
+		}
+		if(strstr(line,"="))
+		{				
+			printf("\nERRO linha %i: Não pode haver atribuição de valores através de \"=\" dentro da função\"leia()\"\n", lineNo);
+	    	system("pause");
+	    	exit(0);
+		}		
+		
+				
+		if(aux > 1)
+		{
+			line = splitChar(line,",",";");
+			strcat(line, ";");
+		}
+		
+		
+	
+		if(checkInsertVarName(name) == 0)
+		{
+			printf("\nERRO linha %i: Variável \"%s\" não declarada anteriormente\n", lineNo, name);
+	    	system("pause");
+	    	exit(0);	
+		}
+		aux--;
+	}
+
+	
+}
 //Check the variable value
 char checkVariable(char *line)
 {
@@ -140,13 +207,85 @@ char checkVariable(char *line)
     return variable[0];
 }
 
+//Find value based on name
+char *findValue(char *name)
+{
+	symbolTable *st = (symbolTable *) malloc(sizeof(symbolTable));
+	//char *auxC = "teste";
+	int i = 1;
+	st = root;
+	
+	while(st != NULL && st->name != NULL)
+	{	
+		if(strcmp(name,st->name) == 0)
+		{
+			return st->value;
+		}
+		else
+		{
+			st = st->next;
+		}
+	}
+	
+	free(st);
+	return "Não Encontrado";
+}
+
+//For function
+char forFn(char *line)
+{	
+	char *token, *name="NULL";
+	int aux = checkChar(line,";");
+	
+	
+	
+	if(strstr(splitChar(line,"(",")"),"inteiro") || strstr(splitChar(line,"(",")"),"caractere") || strstr(splitChar(line,"(",")"),"real"))
+	{
+		printf("\nERRO linha %i: Não pode haver declaração de variável dentro da função \"para()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+	
+	if(strstr(line,"()") || strstr(line,"(,") || strstr(line,",)") || strstr(line,",,") || aux != 3)
+	{
+		printf("\nERRO linha %i: Poucos argumentos dentro da função \"para()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+
+	
+}
+//Se function
+char ifFn(char *line)
+{	
+	char *token, *name="NULL";
+	
+	
+	
+	if(strstr(splitChar(line,"(",")"),"inteiro") || strstr(splitChar(line,"(",")"),"caractere") || strstr(splitChar(line,"(",")"),"real"))
+	{
+		printf("\nERRO linha %i: Não pode haver declaração de variável dentro da função \"se()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+	
+	if(strstr(line,"()") || strstr(line,"(,") || strstr(line,",)") || strstr(line,",,"))
+	{
+		printf("\nERRO linha %i: Poucos argumentos dentro da função \"se()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+
+	
+}
+
 //Remove spaces and useless data
 char* removeSpaces (char* input)
 {
     int i,j, aux = 1;
     char *output=input;
     
-    for (i = 0, j = 0; i<strlen(input); i++,j++)          
+    for (i = 0, j = 0; i<strlen(input); i++,j++)
     {
     	if((input[i] == '>' || input[i] == '<') && (input[i+1] == ' '|| input[i+1] == '\t' || input[i+1] == 'n' ) && (input[i+2] == '=' || input[i+3] == '=' || input[i+4] == '=' )) 
     	{
@@ -176,18 +315,12 @@ char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter)
 {
     const char *s = line;
 
-	const char *PATTERN1 = firstDelimiter;
-    const char *PATTERN2 = secondDelimiter;
+	char *PATTERN1 = firstDelimiter;
+    char *PATTERN2 = secondDelimiter;
 
     char *target = NULL;
     char *start, *end;
 
-	/*
-	if(strstr(s,"\""))
-	{
-		PATTERN1 = "\"";
-		PATTERN2 = "\"";
-	}*/
 	
     if ( start = strstr( s, PATTERN1 ) )
     {
@@ -210,10 +343,10 @@ char *splitChar(char *line, char *firstDelimiter, char *secondDelimiter)
     //if ( target ) printf( "\n\n\n %s\n\n\n", target );
 }
 
-//Splits the contents in the line
+//Insert Variables
 char *insertVariables (char *input)
 {
-	char *token, *string, *name="NULL", *type="NULL", *value="NULL", *sizeLimit="NULL", splitVariable[strlen(input)], splitValue[strlen(input)];
+	char *token, *name="NULL", *type="NULL", *value="NULL", *sizeLimit="NULL", splitVariable[strlen(input)], splitValue[strlen(input)];
 	strcpy(splitVariable, input);
 	strcpy(splitValue, input);
 	int aux = checkChar(input,",") + 1;
@@ -237,15 +370,11 @@ char *insertVariables (char *input)
 		}
 		else
 		{
-			printf("Atribuição de variável deve receber tipo de valor inteiro, caractere ou real!");
+			printf("ERRO na linha %i: Atribuição de variável deve receber tipo de valor inteiro, caractere ou real!", lineNo);
 			system("pause");
 		}
 		
-		if(testSemi(input))
-		{
-			printf("\nA linha deve finalizar com \";\"");
-			return 0;
-		}
+		testSemi(input,lineNo);
 		
 		while(aux != 0)
 		{
@@ -274,7 +403,7 @@ char *insertVariables (char *input)
 			  	
 				if(type != "caractere" && strstr(input,"\""))
 				{
-					printf("\nTipo %s não pode receber valor do tipo charactere!", type);
+					printf("\nERRO na linha %i: Tipo %s não pode receber valor do tipo charactere!",lineNo, type );
 					return 0;
 				}
 				else if(type == "caractere" && strstr(input,"\""))
@@ -290,7 +419,7 @@ char *insertVariables (char *input)
 				}
 				else if(checkNumber(sizeLimit) == 0)
 				{
-					printf("\nO campo aceita apenas valores numéricos entre \"[\" e \"]\".");
+					printf("\nERRO na linha %i: O campo aceita apenas valores numéricos entre \"[\" e \"]\"!", lineNo);
 					return 0;
 				}
 			}
@@ -301,18 +430,17 @@ char *insertVariables (char *input)
 			}
 			if(value != "NULL" && strlen(value) > atoi(sizeLimit) && sizeLimit != "NULL")
 			{
-				printf("\nO valor %s é maior do que o limite implicado de [%s]", value, sizeLimit);
+				printf("\nERRO na linha %i: O valor %s é maior do que o limite implicado de [%s]!",lineNo, value, sizeLimit);
 			}
-			/*
-			if(checkList(name) == 1)
-			{
-				printf("Nome já existe na tabela de símbolos: %s", nome);
-				return 0;
-			}*/
 			
 			testReserved(name);
-    		checkInsertVarName(name);
-			insertSymbol(name, type, value, sizeLimit);
+			if(checkInsertVarName(name) == 1)
+			{
+				printf("\nERRO na linha %i: Variável de nome \"%s\" já foi inserido!\n",lineNo, name);
+				system("pause");
+				exit(0);
+			}
+			insertSymbol(name, type, value, sizeLimit, lineNo);
 			aux--;
 		}
 
@@ -325,6 +453,80 @@ char *insertVariables (char *input)
 		return 0;
 	}
 	return token;
+}
+
+//Escreva function
+char write(char *line)
+{	
+	char *token, *name="NULL", *auxValue="", *auxValue2="";
+	int aux = checkChar(line,",") + 1;
+	
+	
+	
+	testSemi(line,lineNo);
+	
+	if(strstr(splitChar(line,"(",")"),"inteiro") || strstr(splitChar(line,"(",")"),"caractere") || strstr(splitChar(line,"(",")"),"real"))
+	{
+		printf("\nERRO linha %i: Não pode haver declaração de variável dentro da função \"escreva()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+	
+	if(strstr(line,"()") || strstr(line,"(,") || strstr(line,",)") || strstr(line,",,"))
+	{
+		printf("\nERRO linha %i: Poucos argumentos dentro da função \"escreva()\"\n", lineNo);
+    	system("pause");
+    	exit(0);
+	}
+	//printf("%i \n",aux);
+	
+	while(aux != 0)
+	{
+		
+		name = "NULL";
+		if(strstr(line,"#"))
+		{	
+			if(!strstr(splitChar(line,"#",","),"ERRO"))
+		    	name = splitChar(line,"#",",");
+		    else if(!strstr(splitChar(line,"#",")"),"ERRO"))
+		    	name = splitChar(line,"#",")");
+		}
+		if(strstr(line,"=") && strstr(splitChar(line,"(",")"),"inteiro"))
+		{				
+			printf("\nERRO linha %i: Não pode haver atribuição de valores através de \"=\" dentro da função\"escreva()\"\n", lineNo);
+	    	system("pause");
+	    	exit(0);
+		}		
+		if(strstr(line,"\"") && !strstr(splitChar(line,"\"","\""),"ERRO"))
+		{
+			auxValue = splitChar(line,"\"","\"");
+			strcat(auxValue, findValue(name));
+			name = "NULL";
+			line = splitChar(line,",",";");
+			strcat(line, ";");
+			aux--;
+		}
+		else
+			strcat(auxValue, findValue(name));
+				
+		if(aux > 1)
+		{
+			line = splitChar(line,",",";");
+			strcat(line, ";");
+		}
+				
+	
+		if(strcmp(name,"NULL") != 0 && checkInsertVarName(name) == 0)
+		{
+			printf("\nERRO linha %i: Variável \"%s\" não declarada anteriormente\n", lineNo, name);
+	    	system("pause");
+	    	exit(0);	
+		}
+		aux--;
+	}
+	//printf("\nValores da função \"Escreva()\": %s\n", auxValue);
+
+	
 }
 
 //Checks if the character is valid
@@ -357,9 +559,7 @@ int checkInsertVarName(char *name)
 	{	
 		if(strcmp(name,st->name) == 0)
 		{
-			printf("\nVariável de nome \"%s\" já foi inserido:\n",st->name);
-			system("pause");
-			exit(0);
+			return 1;
 		}
 		else
 		{
@@ -368,12 +568,13 @@ int checkInsertVarName(char *name)
 	}
 	
 	free(st);
+	return 0;
 }
 
 //Checks if there is a list
-int *checkList(char *name)
+int checkList(char *name)
 {
-    symbolTable *aux;
+    symbolTable *aux = (symbolTable *) malloc(sizeof(symbolTable));
     char *nameCheck="teste";
 
     aux = root;
@@ -410,19 +611,11 @@ int testReserved(char *str)
 	}
 }
 
-//Checks if there is a ";" where it supposed to be
-int testSemi(const char *str)
-{
-  if(*str && str[strlen(str + 1)] == ';')
-    return 0;
-  else
-    return 1;
-}
 
 //Creates a list
 void createList(char *name, char *type, char *value, char *sizeLimit)
 {
-	root = insertSymbol(name, type, value, sizeLimit);
+	root = insertSymbol(name, type, value, sizeLimit, lineNo);
 }
 
 //Resposible for all equations
@@ -430,9 +623,10 @@ void equation()
 {
 	symbolTable *aux;
 	symbolTable *aux2;
+	char *name, *currentValueChar;
     int i=1;
-    int finalValue;
-       
+    int *currentValue, finalValue;
+
     aux = root;
     aux2 = root;
       
@@ -440,38 +634,66 @@ void equation()
 	{
 		if(aux->type == "caractere")
     		aux = aux->next;
-		 
 		 if(strstr(aux->value,"#"))
 		 {
+		 	
+		 	if(!strstr(splitChar(aux->value,"#","+"),"ERRO"))
+		 		name = splitChar(aux->value,"#","+");
+		 	if(!strstr(splitChar(aux->value,"#","-"),"ERRO"))
+		 		name = splitChar(aux->value,"#","-");
+		 	if(!strstr(splitChar(aux->value,"#","*"),"ERRO"))
+		 		name = splitChar(aux->value,"#","*");
+		 	if(!strstr(splitChar(aux->value,"#","/"),"ERRO"))
+		 		name = splitChar(aux->value,"#","/");
+		 	if(!strstr(splitChar(aux->value,"#","^"),"ERRO"))
+		 		name = splitChar(aux->value,"#","^");
 		 	while(aux2 != NULL)
 		 	{
-				if(!strstr(splitChar(aux->value,"=","+"),"ERRO"))
-				{
-					//aux->value = aux2->value + aux->value;
+		 		if(strcmp(name,aux2->name) == 0)
+		 		{
+		 			if(aux->type != aux2->type)
+		 			{
+		 				printf("Erro, não é possível comparar tipo \"%s\" com \"%s\".",aux->type, aux2->type);
+					}
+					if(!strstr(splitChar(aux->value,"#","+"),"ERRO"))
+					{
+		 				name = splitChar(aux->value,"#","+");
+		 				currentValueChar = splitChar(strcat(aux->value, ";"),"+",";");
+						finalValue = atoi(aux2->value) + atoi(currentValueChar);
+					}
+					if(!strstr(splitChar(aux->value,"#","-"),"ERRO"))
+					{
+		 				name = splitChar(aux->value,"#","-");
+		 				currentValueChar = splitChar(strcat(aux->value, ";"),"-",";");
+						finalValue = atoi(aux2->value) - atoi(currentValueChar);
+					}
+					if(!strstr(splitChar(aux->value,"#","*"),"ERRO"))
+					{
+		 				currentValueChar = splitChar(strcat(aux->value, ";"),"*",";");
+						finalValue = atoi(aux2->value) * atoi(currentValueChar);
+					}
+					if(!strstr(splitChar(aux->value,"#","/"),"ERRO"))
+					{
+		 				currentValueChar = splitChar(strcat(aux->value, ";"),"/",";");
+						finalValue = atoi(aux2->value) / atoi(currentValueChar);
+					}
+					if(!strstr(splitChar(aux->value,"#","^"),"ERRO"))
+					{
+		 				currentValueChar = splitChar(strcat(aux->value, ";"),"^",";");
+						//finalValue = (pow(atoi(aux2->value), atoi(currentValueChar)));
+					}
+					sprintf(aux->value, "%d", finalValue);
 				}
-				if(!strstr(splitChar(aux->value,"=","-"),"ERRO"))
-				{
-					
-				}
-				if(!strstr(splitChar(aux->value,"=","*"),"ERRO"))
-				{
-					
-				}
-				if(!strstr(splitChar(aux->value,"=","/"),"ERRO"))
-				{
-					
-				}
-				if(!strstr(splitChar(aux->value,"=","^"),"ERRO"))
-				{
-					
-				}
+				aux2 = aux2->next;
 			}
-		 }
+		}
+		i++;
+    	aux = aux->next;
     }
     free(aux);
 }
 
-//Counts the lines
+//Counts the lines and call necessary functions
 void lineCount()
 {
 	//read line by line
@@ -480,9 +702,9 @@ void lineCount()
 	while (fgets(line, line_size, fh) != NULL)
 	{
 		line = removeSpaces(line);
-		if(lineNo == 0 && !(strstr(line,"programa")))
+		if(lineNo == 1 && (strcmp(line,"programa")))
 		{
-			printf("O código deve inciar com \"programa\" na linha %i\n",lineNo+1);
+			printf("\nERRO linha %i:  código deve inciar com \"programa\"\n",lineNo);
 			system("pause");
 			exit(0);
 		}
@@ -490,11 +712,31 @@ void lineCount()
 		{
 			lines[lineNo] = line;
     		//printf(lines[lineNo]);
-    		checkVariable(lines[lineNo]);
+    		testLexic(line,lineNo);
+    		if(strstr(line,"inteiro") || strstr(line,"caractere") || strstr(line,"real"))
+    			checkVariable(lines[lineNo]);
+    		if(strstr(line,"leia"))
+    			read(lines[lineNo]);
+    		if(strstr(line,"escreva"))
+    			write(lines[lineNo]);
     		insertVariables(line);
+    		if(strstr(line,"se"))
+    			ifFn(lines[lineNo]);
+    		if(strstr(line,"para"))
+    			forFn(lines[lineNo]);
 		}
+		if(size > 350000000)
+			printf("ERRO Memória Insuficiente");
     	
 		lineNo++;
+	}
+	if(!strcmp(line,"fim"))
+		testFinal(line,lineNo);
+	else
+	{
+		printf("\nERRO linha %i:  código deve finalizar com \"fim\"\n", lineNo);
+		system("pause");
+		exit(0);
 	}
 	
 	free(line);
